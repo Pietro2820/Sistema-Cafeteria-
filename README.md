@@ -48,24 +48,24 @@ O desenvolvimento é feito em **Learning in Public**: cada etapa é documentada 
 
 ## 🗺️ Roadmap
 
-Progresso do projeto por fase. Itens concluídos são marcados com ✅ e a respectiva data.
+Progresso do projeto por fase. Itens concluídos vêm marcados com a caixa preenchida e a respectiva data.
 
 <details open>
 <summary><strong>🏗️ Fase 0 — Setup Inicial</strong></summary>
 
-- [x] Criar repositório no GitHub e configurar ambiente local — `30/08/2026`
-- [x] Instalar Next.js com TypeScript e configurar o projeto — `30/08/2026`
-- [x] Criar projeto no Supabase e obter credenciais — `30/08/2026`
-- [x] Configurar `.env.local` e cliente Supabase — `30/08/2026`
+- [x] Criar repositório no GitHub e configurar ambiente local — `29/08/2026`
+- [x] Instalar Next.js com TypeScript e configurar o projeto — `29/08/2026`
+- [x] Criar projeto no Supabase e obter credenciais — `29/08/2026`
+- [x] Configurar `.env.local` e cliente Supabase — `29/08/2026`
 
 </details>
 
 <details open>
 <summary><strong>🗄️ Fase 1 — Banco de Dados</strong></summary>
 
-- [x] Criar tabelas de `categorias` e `produtos` — `30/08/2026`
-- [x] Inserir dados de exemplo no banco — `30/08/2026`
-- [x] Configurar políticas de acesso (RLS) — `30/08/2026`
+- [x] Criar tabelas de `categorias` e `produtos` — `29/08/2026`
+- [x] Inserir dados de exemplo no banco — `29/08/2026`
+- [x] Configurar políticas de acesso (RLS) — `29/08/2026`
 - [ ] Criar tabelas de `pedidos` e `itens_pedido`
 - [ ] Criar tabelas de `clientes` e `usuarios`
 
@@ -74,7 +74,7 @@ Progresso do projeto por fase. Itens concluídos são marcados com ✅ e a respe
 <details open>
 <summary><strong>🖥️ Fase 2 — Frontend Básico</strong></summary>
 
-- [x] Exibir cardápio na página inicial (`page.tsx`) — `30/08/2026`
+- [x] Exibir cardápio na página inicial (`page.tsx`) — `29/08/2026`
 - [ ] Criar tela de cadastro de produtos (CRUD)
 - [ ] Criar tela de edição e exclusão de produtos
 - [ ] Criar tela de listagem de categorias
