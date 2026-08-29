@@ -15,7 +15,7 @@ Desenvolvido do zero com foco em aprendizado prático e boas práticas de desenv
 [Tecnologias](#️-tecnologias) •
 [Roadmap](#️-roadmap) •
 [Como Rodar](#-como-rodar-o-projeto) •
-[Autor](#-autor)
+[Autores](#-autores)
 
 </div>
 
@@ -142,7 +142,7 @@ Acesse [http://localhost:3000](http://localhost:3000) no navegador. 🎉
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻👩‍💻 Autores
 
 **Pietro Cardoso**
 Estudante de Ciência da Computação, com foco em desenvolvimento backend.
@@ -150,10 +150,16 @@ Estudante de Ciência da Computação, com foco em desenvolvimento backend.
 [![GitHub](https://img.shields.io/badge/GitHub-Pietro2820-181717?style=flat&logo=github)](https://github.com/Pietro2820)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-pietro--cardoso-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/pietro-cardoso)
 
+**Kelly Cardoso**
+Parceira no desenvolvimento do projeto.
+
+[![GitHub](https://img.shields.io/badge/GitHub-KellyCardosoB-181717?style=flat&logo=github)](https://github.com/KellyCardosoB)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-kellycardosob-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/kellycardosob/)
+
 ---
 
 <div align="center">
 
-**Desenvolvido com ☕ e código por Pietro Cardoso**
+**Desenvolvido com ☕ e código por Pietro Cardoso e Kelly Cardoso**
 
 </div>
