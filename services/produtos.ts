@@ -8,6 +8,8 @@ export type Produto = {
   preco: number
   categoria_id: number | null
   disponivel: boolean
+  estoque: number;       
+  avaliacao: number; 
   criado_em?: string
   atualizado_em?: string
 }

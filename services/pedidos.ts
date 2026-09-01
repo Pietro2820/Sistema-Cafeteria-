@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 export type Pedido = {
   id: string
   cliente_nome: string | null
+  cliente_id: string | null;
   status: string
   valor_total: number
   observacao: string | null
