@@ -366,7 +366,7 @@ export default function AdminPanel() {
             </div>
             {pedidos.map((order) => (
               <div className="order-row" key={order.id}>
-                <span>#{order.id.slice(0, 8)}</span>
+                <span>#{order.numero_pedido}</span>
                 <span>{order.cliente_nome || "Cliente Balcão"}</span>
                 <span>R$ {order.valor_total.toFixed(2).replace('.', ',')}</span>
                 <select 
