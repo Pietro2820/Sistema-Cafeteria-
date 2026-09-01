@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
+const supabase = createClient()
 
 // Tipo de dados do Produto (Kelly usar no frontend)
 export type Produto = {
