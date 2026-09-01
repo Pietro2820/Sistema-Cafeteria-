@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Produto, buscarProdutos, criarProduto, atualizarProduto, excluirProduto } from '@/services/produtos'
+import { Produto, buscarProdutos, criarProduto, atualizarProduto, excluirProduto, uploadImagemProduto } from '@/services/produtos'
 
 export function useProdutos() {
   const [produtos, setProdutos] = useState<Produto[]>([])
@@ -50,6 +50,16 @@ export function useProdutos() {
     }
   }
 
+  // Enviar foto (NOVO) - devolve a URL pública pra UI usar como quiser
+  // (ex: incluir no objeto antes de chamar adicionar/atualizar)
+  async function enviarImagem(file: File) {
+    try {
+      return await uploadImagemProduto(file)
+    } catch (error: any) {
+      throw error
+    }
+  }
+
   // Carregar ao montar o componente
   useEffect(() => {
     carregar()
@@ -62,6 +72,7 @@ export function useProdutos() {
     adicionar,
     atualizar,
     excluir,
+    enviarImagem,
     recarregar: carregar
   }
 }

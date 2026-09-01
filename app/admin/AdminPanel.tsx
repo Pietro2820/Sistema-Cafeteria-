@@ -30,7 +30,8 @@ export default function AdminPanel() {
     erro: erroProdutos, 
     adicionar: adicionarProduto, 
     atualizar: atualizarProduto, 
-    excluir: excluirProduto 
+    excluir: excluirProduto,
+    enviarImagem
   } = useProdutos();
 
   const { 
@@ -56,6 +57,14 @@ export default function AdminPanel() {
   const [formEstoque, setFormEstoque] = useState(0);
   const [formDisponivel, setFormDisponivel] = useState(true);
   const [formCategoriaId, setFormCategoriaId] = useState<number | null>(null);
+  const [formImagemFile, setFormImagemFile] = useState<File | null>(null);
+  const [formImagemPreview, setFormImagemPreview] = useState<string | null>(null);
+  const [enviandoImagem, setEnviandoImagem] = useState(false);
+
+  // Estado do modal de categoria (separado do modal de produto,
+  // porque são fluxos diferentes: categoria só tem nome)
+  const [categoriaModalAberto, setCategoriaModalAberto] = useState(false);
+  const [formNomeCategoria, setFormNomeCategoria] = useState("");
 
   useEffect(() => {
     if (modalMode === "editar" && selectedId) {
@@ -66,6 +75,8 @@ export default function AdminPanel() {
         setFormEstoque(item.estoque);
         setFormDisponivel(item.disponivel);
         setFormCategoriaId(item.categoria_id);
+        setFormImagemFile(null);
+        setFormImagemPreview(item.imagem_url || null);
       }
     } else if (modalMode === "criar") {
       setFormNome("");
@@ -73,12 +84,25 @@ export default function AdminPanel() {
       setFormEstoque(0);
       setFormDisponivel(true);
       setFormCategoriaId(categorias[0]?.id || null);
+      setFormImagemFile(null);
+      setFormImagemPreview(null);
     }
   }, [modalMode, selectedId, produtos, categorias]);
 
   function goTo(section: SectionId) {
     setActiveSection(section);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Quando a pessoa escolhe um arquivo, só geramos uma prévia LOCAL
+  // (URL.createObjectURL) — o upload de verdade só acontece quando
+  // ela clicar em "Salvar", não a cada seleção de arquivo.
+  function handleSelecionarImagem(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFormImagemFile(file);
+    setFormImagemPreview(URL.createObjectURL(file));
   }
 
   function abrirModalCriar() {
@@ -104,6 +128,24 @@ export default function AdminPanel() {
 
     const precoNumerico = parseFloat(formPreco.replace(",", "."));
 
+    // Se a pessoa escolheu um arquivo novo, faz o upload AGORA (só na
+    // hora de salvar, não a cada clique) e usa a URL retornada.
+    // Se não escolheu nada novo, mantém a foto que já estava (prévia
+    // pode já ser a imagem_url antiga, vinda do modo "editar").
+    let imagemUrl = formImagemPreview && !formImagemFile ? formImagemPreview : null;
+
+    if (formImagemFile) {
+      setEnviandoImagem(true);
+      try {
+        imagemUrl = await enviarImagem(formImagemFile);
+      } catch (err: any) {
+        alert(`Erro ao enviar imagem: ${err.message}`);
+        setEnviandoImagem(false);
+        return;
+      }
+      setEnviandoImagem(false);
+    }
+
     const dadosProduto = {
       nome: formNome,
       preco: precoNumerico,
@@ -112,6 +154,7 @@ export default function AdminPanel() {
       categoria_id: formCategoriaId,
       descricao: "Descrição do produto",
       avaliacao: 5.0,
+      imagem_url: imagemUrl,
     };
 
     try {
@@ -138,14 +181,27 @@ export default function AdminPanel() {
     }
   }
 
-  async function handleNovaCategoria() {
-    const nome = prompt("Nome da nova categoria:");
-    if (nome && nome.trim() !== "") {
-      try {
-        await adicionarCategoria(nome.trim());
-      } catch (err: any) {
-        alert(`Erro ao criar categoria: ${err.message}`);
-      }
+  function abrirModalCategoria() {
+    setFormNomeCategoria("");
+    setCategoriaModalAberto(true);
+  }
+
+  function fecharModalCategoria() {
+    setCategoriaModalAberto(false);
+  }
+
+  async function handleSalvarCategoria() {
+    if (!formNomeCategoria.trim()) {
+      alert("Digite um nome para a categoria!");
+      return;
+    }
+
+    try {
+      await adicionarCategoria(formNomeCategoria.trim());
+      fecharModalCategoria();
+    } catch (err: any) {
+      console.error("Erro ao criar categoria:", err);
+      alert(`Erro ao criar categoria: ${err.message}`);
     }
   }
 
@@ -255,7 +311,7 @@ export default function AdminPanel() {
               <h2>Categorias</h2>
               <p>Organize como os itens aparecem no cardápio do cliente</p>
             </div>
-            <button className="pill-btn outline" onClick={handleNovaCategoria}>+ Nova categoria</button>
+            <button className="pill-btn outline" onClick={abrirModalCategoria}>+ Nova categoria</button>
           </div>
           <div className="cat-grid">
             {categorias.map((cat, idx) => (
@@ -270,7 +326,7 @@ export default function AdminPanel() {
                 </div>
               </div>
             ))}
-            <div className="cat-card new" onClick={handleNovaCategoria}>
+            <div className="cat-card new" onClick={abrirModalCategoria}>
               <span style={{ fontSize: 26 }}>+</span>
               <span>Criar nova categoria</span>
             </div>
@@ -302,7 +358,14 @@ export default function AdminPanel() {
           <div className="menu-grid">
             {produtosFiltrados.map((item) => (
               <div className="menu-card" key={item.id}>
-                <div className="menu-photo">
+                <div
+                  className="menu-photo"
+                  style={
+                    item.imagem_url
+                      ? { backgroundImage: `url(${item.imagem_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                      : undefined
+                  }
+                >
                   <span className="rating-badge">
                     <span className="star">★</span> {item.avaliacao || '5.0'}
                   </span>
@@ -438,11 +501,30 @@ export default function AdminPanel() {
       {/* MODAL */}
       <div className={`modal-overlay${modalMode ? " active" : ""}`} onClick={fecharModal}>
         <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-photo">
+          <div
+            className="modal-photo"
+            style={
+              formImagemPreview
+                ? { backgroundImage: `url(${formImagemPreview})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                : undefined
+            }
+          >
             <button className="icon-btn back" onClick={fecharModal}>
               ←
             </button>
-            <button className="icon-btn fav">♡</button>
+            <label
+              className="icon-btn fav"
+              style={{ cursor: 'pointer', right: 16, left: 'auto', position: 'absolute', top: 16 }}
+              title="Adicionar foto"
+            >
+              {enviandoImagem ? "…" : "📷"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleSelecionarImagem}
+                style={{ display: 'none' }}
+              />
+            </label>
           </div>
           <div className="modal-body">
             <h2>{modalMode === "criar" ? "Novo Item" : "Editar Item"}</h2>
@@ -493,6 +575,30 @@ export default function AdminPanel() {
           <div className="modal-footer">
             <button className="icon-btn" onClick={fecharModal}>✕</button>
             <button className="pill-btn" onClick={handleSalvarProduto}>Salvar alterações</button>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL DE CATEGORIA */}
+      <div className={`modal-overlay${categoriaModalAberto ? " active" : ""}`} onClick={fecharModalCategoria}>
+        <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 380 }}>
+          <div className="modal-body" style={{ paddingTop: 26 }}>
+            <h2>Nova Categoria</h2>
+
+            <div className="modal-label">Nome da Categoria</div>
+            <input
+              type="text"
+              className="pill-btn outline"
+              style={{ width: '100%', textAlign: 'left', marginBottom: 16, cursor: 'text' }}
+              value={formNomeCategoria}
+              onChange={(e) => setFormNomeCategoria(e.target.value)}
+              placeholder="Ex: Bebidas Geladas"
+              autoFocus
+            />
+          </div>
+          <div className="modal-footer">
+            <button className="icon-btn" onClick={fecharModalCategoria}>✕</button>
+            <button className="pill-btn" onClick={handleSalvarCategoria}>Criar categoria</button>
           </div>
         </div>
       </div>
