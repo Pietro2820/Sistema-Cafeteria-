@@ -27,6 +27,7 @@ export type ItemPedido = {
 // CREATE - Criar novo pedido
 export async function criarPedido(pedido: {
   cliente_nome?: string
+  cliente_id?: string | null
   observacao?: string
   itens: {
     produto_id: string
@@ -45,6 +46,7 @@ export async function criarPedido(pedido: {
     .from('pedidos')
     .insert([{
       cliente_nome: pedido.cliente_nome || null,
+      cliente_id: pedido.cliente_id || null,
       observacao: pedido.observacao || null,
       valor_total
     }])
