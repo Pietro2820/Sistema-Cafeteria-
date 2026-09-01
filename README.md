@@ -8,12 +8,13 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5C3A21?style=for-the-badge&logo=typescript&logoColor=F7E7CE)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=1C1C1C)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-8A5A34?style=for-the-badge&logo=postgresql&logoColor=F7E7CE)
+![Zod](https://img.shields.io/badge/Zod-6B4226?style=for-the-badge&logo=zod&logoColor=F7E7CE)
 
 <sub>☕ Sistema completo de gestão e PDV para cafeterias — do grão ao pedido finalizado ☕</sub>
 
 <br/>
 
-[Sobre](#-sobre-o-projeto) • [Arquitetura](#️-arquitetura-a-receita-por-trás-do-café) • [Cardápio Técnico](#️-cardápio-técnico) • [Etapas de Preparo](#️-etapas-de-preparo-roadmap) • [Como Rodar](#-como-servir-este-café-instalação) • [Baristas](#-baristas-autores)
+[Sobre](#-sobre-o-projeto) • [Arquitetura](#️-arquitetura-a-receita-por-trás-do-café) • [Cardápio Técnico](#️-cardápio-técnico) • [Etapas de Preparo](#️-etapas-de-preparo-roadmap) • [Segurança](#-segurança-em-camadas-o-cuidado-com-cada-grão) • [Como Rodar](#-como-servir-este-café-instalação) • [Baristas](#-baristas-autores)
 
 </div>
 
@@ -26,6 +27,12 @@
 ## 📖 Sobre o Projeto
 
 O **Sistema Cafeteria** é um sistema de gestão ponta a ponta para cafeterias — do cadastro de produtos ao fechamento de pedidos e relatórios de faturamento. Nasceu como laboratório prático de **arquitetura de software**, **modelagem de banco de dados relacional**, **lógica de negócio** e **integração com serviços em nuvem**, mas foi desenhado com padrões e organização de código pensados para produção real.
+
+O cardápio é servido para **3 públicos distintos**, cada um com sua própria experiência:
+
+- 🛒 **Cliente** — cardápio público, carrinho de compras e acompanhamento do pedido
+- 👨‍🍳 **Operário** — cozinha (KDS) e balcão, com atualizações em tempo real, sem precisar dar F5
+- 🛠️ **Admin** — gestão completa de cardápio, categorias, pedidos e relatórios
 
 O desenvolvimento segue a filosofia de **Learning in Public** ☀️ — cada etapa é documentada aqui para que qualquer pessoa acompanhe a evolução em tempo real, do mesmo jeito que se acompanha um espresso sendo tirado.
 
@@ -57,7 +64,12 @@ Supabase (PostgreSQL)
   app/ + components/  → ☕ o café servido (UI)
 ```
 
-Essa separação mantém a lógica de negócio isolada da interface — facilita testes, manutenção e a divisão de tarefas entre os desenvolvedores.
+Essa separação mantém a lógica de negócio isolada da interface — facilita testes, manutenção e a divisão de tarefas entre os desenvolvedores. Alguns princípios seguidos à risca:
+
+- **Separação de responsabilidades** — a UI nunca chama o Supabase diretamente
+- **Reatividade** — os hooks concentram o estado de loading, erro e dados
+- **Regras de negócio no backend** — ex.: pedidos cancelados são ignorados nos relatórios
+- **Tipagem estrita** — TypeScript em todas as camadas, do banco à tela
 
 ---
 
@@ -71,6 +83,7 @@ Essa separação mantém a lógica de negócio isolada da interface — facilita
 | 🥛 **Encorpamento** | TypeScript | Tipagem estática para segurança e produtividade |
 | 🎨 **Latte art** | CSS Modules | Controle total sobre o layout, sem dependências pesadas |
 | 🫘 **Grão selecionado** | Supabase (PostgreSQL) | BaaS completo com Auth, Realtime e Row Level Security |
+| 🧪 **Filtro de qualidade** | Zod *(planejado)* | Validação de schema, barrando dados inválidos antes de chegar ao banco |
 | 📋 **Ficha técnica** | Git + GitHub | Histórico público e documentado do desenvolvimento |
 
 </div>
@@ -96,16 +109,18 @@ Do grão cru até o café servido — progresso do projeto por fase, com data de
 - [x] Criar tabelas de `categorias` e `produtos` (UUID e flag de disponibilidade) — `30/08/2026`
 - [x] Criar tabelas de `pedidos` e `itens_pedido` com Foreign Keys — `30/08/2026`
 - [x] Configurar ações de Cascade (exclusão de itens) e Restrict (proteção de histórico) — `30/08/2026`
+- [x] Adicionar colunas de timestamp (`criado_em`, `atualizado_em`) com triggers automáticos — `31/08/2026`
 
 </details>
 
 <details open>
 <summary><strong>⚙️ Fase 2 — Extração (Arquitetura de Backend)</strong> <kbd>concluída</kbd></summary>
 
-- [x] Criar camada de services para abstrair chamadas ao Supabase — `30/08/2026`
-- [x] Criar custom hooks reativos (`useProdutos`, `usePedidos`, etc.) — `30/08/2026`
-- [x] Implementar módulo de Analytics (faturamento diário, ticket médio, top produtos) — `30/08/2026`
-- [x] Aplicar regras de negócio (ex.: ignorar pedidos cancelados nos relatórios) — `30/08/2026`
+- [x] Criar camada de services para abstrair chamadas ao Supabase — `31/08/2026`
+- [x] Criar custom hooks reativos (`useProdutos`, `useCategorias`, `usePedidos`, `useAnalytics`) — `31/08/2026`
+- [x] Implementar módulo de Analytics (faturamento diário, ticket médio, top produtos) — `31/08/2026`
+- [x] Aplicar regras de negócio (ex.: ignorar pedidos cancelados nos relatórios) — `31/08/2026`
+- [x] Campo de disponibilidade (`disponivel`) para controlar estoque sem apagar histórico — `31/08/2026`
 
 </details>
 
@@ -115,21 +130,45 @@ Do grão cru até o café servido — progresso do projeto por fase, com data de
 - [x] Layout do painel administrativo (dashboard, cardápio, categorias, fila de pedidos) — `31/08/2026`
 - [x] Modal de edição de produtos e filtros por categoria — `31/08/2026`
 - [x] Status de pedidos com cores dinâmicas — `31/08/2026`
-- [ ] Integração real entre frontend e backend
-- [ ] Tela do PDV com carrinho de compras
+- [ ] Integração real entre frontend e backend (substituir dados estáticos pelos hooks)
+- [ ] Tela do PDV com carrinho de compras (experiência do cliente)
 - [ ] Cálculo de total e finalização de pedido
+- [ ] Tela da cozinha (KDS) com atualizações em tempo real (experiência do operário)
 
 </details>
 
 <details>
 <summary><strong>🚀 Fase 4 — Café Pronto para o Cliente (Produção)</strong> <kbd>planejada</kbd></summary>
 
-- [ ] Sistema de login (Supabase Auth)
+- [ ] Sistema de login (Supabase Auth) com papéis (admin, operário, cliente)
 - [ ] Row Level Security (RLS) para produção
 - [ ] Realtime para atualização instantânea da cozinha (KDS)
+- [ ] Validação com Zod em todas as operações de escrita
+- [ ] Edge Functions para lógica sensível (finalização de pedido com baixa de estoque)
 - [ ] Integração com gateway de pagamento
 
 </details>
+
+---
+
+## 🔐 Segurança em Camadas (o cuidado com cada grão)
+
+Segurança não é um tempero opcional, é a base da receita. O projeto segue o princípio de **defense in depth** (defesa em profundidade), em três níveis:
+
+**Nível 1 — Obrigatório (produção mínima)**
+- Row Level Security (RLS) com políticas granulares em cada tabela: `categorias`/`produtos` com leitura pública e escrita restrita ao admin; `pedidos` visível só para o próprio cliente (admin vê todos); `itens_pedido` herdando a permissão do pedido pai
+- Chaves seguras: `anon_key` é pública por design, `service_role_key` nunca fica no frontend
+
+**Nível 2 — Profissional (confiabilidade)**
+- Validação com Zod em todos os services, barrando dados inválidos antes do banco
+- Middleware do Next.js protegendo as rotas `/admin` e `/cozinha`
+- Sanitização — nunca renderizar HTML cru vindo do usuário
+
+**Nível 3 — Enterprise (produção robusta)**
+- Edge Functions para lógica sensível (cálculo de totais, baixa de estoque) rodando com `service_role`
+- Headers de segurança (CSP, X-Frame-Options, HSTS) no `next.config.ts`
+- Auditoria via trigger, registrando quem alterou o quê em uma tabela `audit_logs`
+- Rate limiting contra spam de pedidos por IP/usuário
 
 ---
 
@@ -172,7 +211,7 @@ Este é um projeto de aprendizado aberto — a mesa está posta. Sugestões, iss
 <tr>
 <td align="center" width="50%">
 <strong>Pietro Cardoso</strong><br/>
-<sub>Arquitetura de backend, modelagem de dados e lógica de negócio</sub><br/><br/>
+<sub>Arquitetura de backend, modelagem de dados, lógica de negócio e segurança</sub><br/><br/>
 <a href="https://github.com/Pietro2820"><img src="https://img.shields.io/badge/GitHub-Pietro2820-3B2314?style=flat&logo=github&logoColor=F7E7CE"/></a>
 <a href="https://www.linkedin.com/in/pietro-cardoso"><img src="https://img.shields.io/badge/LinkedIn-pietro--cardoso-0A66C2?style=flat&logo=linkedin&logoColor=white"/></a>
 </td>
