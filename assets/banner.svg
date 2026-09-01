@@ -1,0 +1,92 @@
+<svg width="1200" height="280" viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B2314"/>
+      <stop offset="55%" stop-color="#5C3A21"/>
+      <stop offset="100%" stop-color="#8A5A34"/>
+    </linearGradient>
+    <linearGradient id="cream" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F7E7CE"/>
+      <stop offset="100%" stop-color="#E8C79E"/>
+    </linearGradient>
+    <radialGradient id="beanShine" cx="30%" cy="25%" r="80%">
+      <stop offset="0%" stop-color="#7A4A28"/>
+      <stop offset="100%" stop-color="#3E2412"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="280" fill="url(#bg)"/>
+
+  <!-- scattered coffee beans -->
+  <g opacity="0.35">
+    <g transform="translate(60,40) rotate(20)">
+      <ellipse cx="0" cy="0" rx="16" ry="10" fill="url(#beanShine)"/>
+      <path d="M -14 0 Q 0 -6 14 0" stroke="#2A1608" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(1120,60) rotate(-15)">
+      <ellipse cx="0" cy="0" rx="14" ry="9" fill="url(#beanShine)"/>
+      <path d="M -12 0 Q 0 -5 12 0" stroke="#2A1608" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(1050,210) rotate(35)">
+      <ellipse cx="0" cy="0" rx="18" ry="11" fill="url(#beanShine)"/>
+      <path d="M -15 0 Q 0 -6 15 0" stroke="#2A1608" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(90,220) rotate(-25)">
+      <ellipse cx="0" cy="0" rx="15" ry="9" fill="url(#beanShine)"/>
+      <path d="M -13 0 Q 0 -5 13 0" stroke="#2A1608" stroke-width="2" fill="none"/>
+    </g>
+    <g transform="translate(150,130) rotate(10)">
+      <ellipse cx="0" cy="0" rx="11" ry="7" fill="url(#beanShine)"/>
+      <path d="M -9 0 Q 0 -4 9 0" stroke="#2A1608" stroke-width="1.5" fill="none"/>
+    </g>
+    <g transform="translate(1080,140) rotate(-40)">
+      <ellipse cx="0" cy="0" rx="12" ry="7" fill="url(#beanShine)"/>
+      <path d="M -10 0 Q 0 -4 10 0" stroke="#2A1608" stroke-width="1.5" fill="none"/>
+    </g>
+  </g>
+
+  <!-- steam -->
+  <g stroke="#F7E7CE" stroke-width="4" fill="none" opacity="0.55" stroke-linecap="round">
+    <path d="M 195 95 C 185 80, 205 70, 195 55 C 187 43, 203 33, 197 20">
+      <animate attributeName="d"
+        values="M 195 95 C 185 80, 205 70, 195 55 C 187 43, 203 33, 197 20;
+                 M 195 95 C 205 80, 185 70, 195 55 C 203 43, 187 33, 195 20;
+                 M 195 95 C 185 80, 205 70, 195 55 C 187 43, 203 33, 197 20"
+        dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 225 95 C 215 78, 235 68, 225 50 C 217 38, 233 28, 227 15">
+      <animate attributeName="d"
+        values="M 225 95 C 215 78, 235 68, 225 50 C 217 38, 233 28, 227 15;
+                 M 225 95 C 235 78, 215 68, 225 50 C 233 38, 217 28, 225 15;
+                 M 225 95 C 215 78, 235 68, 225 50 C 217 38, 233 28, 227 15"
+        dur="4.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- coffee cup -->
+  <g transform="translate(140,95)">
+    <path d="M20 40 L100 40 L92 105 Q90 118 76 118 L44 118 Q30 118 28 105 Z" fill="url(#cream)" stroke="#3B2314" stroke-width="3"/>
+    <ellipse cx="60" cy="40" rx="40" ry="9" fill="#5C3A21" stroke="#3B2314" stroke-width="3"/>
+    <ellipse cx="60" cy="40" rx="31" ry="6" fill="#3E2412"/>
+    <path d="M100 52 Q128 52 128 76 Q128 100 100 96" fill="none" stroke="#3B2314" stroke-width="6"/>
+    <rect x="10" y="118" width="100" height="10" rx="4" fill="#3B2314"/>
+  </g>
+
+  <!-- title -->
+  <text x="620" y="120" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="bold" fill="#F7E7CE" text-anchor="middle">Sistema Cafeteria</text>
+  <text x="620" y="160" font-family="Verdana, sans-serif" font-size="20" fill="#E8C79E" text-anchor="middle" letter-spacing="1.5">GESTÃO &amp; PONTO DE VENDA PARA CAFETERIAS</text>
+
+  <!-- divider dots -->
+  <g fill="#E8C79E">
+    <circle cx="500" cy="185" r="3"/>
+    <circle cx="530" cy="185" r="3"/>
+    <circle cx="560" cy="185" r="3"/>
+    <circle cx="620" cy="185" r="3"/>
+    <circle cx="680" cy="185" r="3"/>
+    <circle cx="710" cy="185" r="3"/>
+    <circle cx="740" cy="185" r="3"/>
+  </g>
+
+  <text x="620" y="225" font-family="Verdana, sans-serif" font-size="15" fill="#C89B6C" text-anchor="middle">Next.js · TypeScript · Supabase · PostgreSQL</text>
+  <text x="620" y="252" font-family="Verdana, sans-serif" font-size="13" font-style="italic" fill="#A87F55" text-anchor="middle">Desenvolvido em Learning in Public por Pietro Cardoso &amp; Kelly Cardoso</text>
+</svg>
