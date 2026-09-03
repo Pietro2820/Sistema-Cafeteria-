@@ -231,7 +231,15 @@ export default function AdminPanel() {
   return (
     <div className="admin-panel">
       <header className="topbar">
-        <div className="logo">Grão<sup>”</sup></div>
+        <div className="logo">
+          <svg width="30" height="30" viewBox="0 0 60 60" fill="none">
+            <ellipse cx="27" cy="32" rx="16" ry="21" transform="rotate(-18 27 32)" stroke="#1F3A2E" strokeWidth="2.2" />
+            <path d="M27 13c-5 7 5 11 0 19s-5 11 0 18" stroke="#1F3A2E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+            <path d="M38 9c6-3 12 2 10 8-6 1-12-2-10-8z" fill="#B9862F" />
+            <path d="M43 13c1.2 2 1.2 4.2 0 6.2" stroke="#1F3A2E" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+          Grão
+        </div>
         <nav className="tabs">
           {TABS.map((tab) => (
             <div
