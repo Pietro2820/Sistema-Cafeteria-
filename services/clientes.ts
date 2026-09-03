@@ -9,6 +9,7 @@ export type Cliente = {
   auth_user_id: string | null
   criado_em: string
   atualizado_em: string
+  numero_de_telefone: string | null
 }
 
 // READ - Buscar cliente pelo CPF
