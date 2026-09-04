@@ -21,6 +21,8 @@ export function usePedidos() {
 
   async function criar(pedido: {
     cliente_nome?: string
+    cliente_id?: string
+    forma_pagamento?: string
     observacao?: string
     itens: {
       produto_id: string
@@ -30,8 +32,9 @@ export function usePedidos() {
     }[]
   }) {
     try {
-      await criarPedido(pedido)
+      const novoPedido = await criarPedido(pedido)
       await carregar()
+      return novoPedido
     } catch (error: any) {
       throw error
     }

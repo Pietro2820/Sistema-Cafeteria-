@@ -1,7 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import "./ClientFlow.css";
+import { useProdutos } from "@/hooks/useProdutos";
+import { useCategorias } from "@/hooks/useCategorias";
+import { usePedidos } from "@/hooks/usePedidos";
+import { useClientes } from "@/hooks/useClientes";
 
 type StepId =
   | "cpf"
@@ -15,37 +19,11 @@ type StepId =
 type PayType = "pix" | "cartao" | "dinheiro";
 type Tone = "sage" | "tan" | "blush";
 
-interface Product {
-  id: number;
-  name: string;
-  desc: string;
-  price: number;
-  cat: string;
-  tone: Tone;
-}
-
-interface Category {
-  key: string;
-  label: string;
-}
-
-const PRODUCTS: Product[] = [
-  { id: 1, name: "Cappuccino cremoso", desc: "Espresso, leite vaporizado, espuma", price: 12.9, cat: "bebidas-quentes", tone: "sage" },
-  { id: 2, name: "Chocolate quente", desc: "Cacau 60%, leite integral", price: 10.9, cat: "bebidas-quentes", tone: "tan" },
-  { id: 3, name: "Café gelado com leite", desc: "Extração fria, leite, gelo", price: 13.5, cat: "bebidas-frias", tone: "blush" },
-  { id: 4, name: "Suco natural", desc: "Fruta da estação, sem açúcar", price: 9.9, cat: "bebidas-frias", tone: "sage" },
-  { id: 5, name: "Pão de queijo (6un)", desc: "Receita mineira, fresquinho", price: 14.0, cat: "salgados", tone: "tan" },
-  { id: 6, name: "Folhado de frango", desc: "Massa amanteigada, recheio cremoso", price: 11.5, cat: "salgados", tone: "blush" },
-  { id: 7, name: "Bolo de fubá", desc: "Receita da casa, fatia generosa", price: 9.5, cat: "doces", tone: "sage" },
-  { id: 8, name: "Torta de limão", desc: "Merengue tostado na hora", price: 11.0, cat: "doces", tone: "tan" },
-];
-
-const CATEGORIES: Category[] = [
-  { key: "bebidas-quentes", label: "Bebidas quentes" },
-  { key: "bebidas-frias", label: "Bebidas frias" },
-  { key: "salgados", label: "Salgados" },
-  { key: "doces", label: "Doces" },
-];
+// Os produtos/categorias agora vêm do banco (useProdutos/useCategorias).
+// `Tone` continua existindo só pra dar variedade visual aos cards quando
+// o produto não tem foto — é atribuído por posição (round-robin), não
+// é um dado real do banco.
+const TONES: Tone[] = ["sage", "tan", "blush"];
 
 const STAGES: Record<StepId, number> = {
   cpf: 1,
@@ -94,13 +72,24 @@ function formatCpf(raw: string) {
 }
 
 export default function ClientFlow() {
+  // Dados reais vindos do banco, via hooks (nunca falamos com o
+  // Supabase direto aqui — arquitetura em camadas)
+  const { produtos, carregando: carregandoProdutos } = useProdutos();
+  const { categorias } = useCategorias();
+  const { criar: criarPedido } = usePedidos();
+  const { buscarPorCpf, salvar: salvarCliente } = useClientes();
+
   const [step, setStep] = useState<StepId>("cpf");
-  const [cart, setCart] = useState<Record<number, number>>({});
+  // Carrinho agora é chaveado por STRING (uuid do produto), não number,
+  // porque produtos reais do Supabase têm id do tipo uuid.
+  const [cart, setCart] = useState<Record<string, number>>({});
   const [selectedPay, setSelectedPay] = useState<PayType>("pix");
   const [activeChip, setActiveChip] = useState<string>("todos");
   const [cpf, setCpf] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [clienteId, setClienteId] = useState<string | undefined>(undefined);
+  const [enviando, setEnviando] = useState(false);
   const [cardBumpKey, setCardBumpKey] = useState(0);
   const [cartShake, setCartShake] = useState(false);
   const [orderNum, setOrderNum] = useState("");
@@ -110,17 +99,32 @@ export default function ClientFlow() {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuWrapRef = useRef<HTMLDivElement>(null);
 
+  // Produtos disponíveis pro cardápio: só os marcados como `disponivel`.
+  // Cada produto recebe um `tone` de reserva (pra quando não tem foto),
+  // atribuído por posição na lista.
+  const produtosDisponiveis = useMemo(() => {
+    return produtos
+      .filter((p) => p.disponivel)
+      .map((p, i) => ({ ...p, tone: TONES[i % TONES.length] }));
+  }, [produtos]);
+
+  // Categorias em uso: só as que têm pelo menos 1 produto disponível
+  const categoriasEmUso = useMemo(() => {
+    const idsComProduto = new Set(produtosDisponiveis.map((p) => p.categoria_id));
+    return categorias.filter((c) => idsComProduto.has(c.id));
+  }, [categorias, produtosDisponiveis]);
+
   const { qty, subtotal } = useMemo(() => {
     let q = 0;
     let s = 0;
     Object.entries(cart).forEach(([id, count]) => {
-      const p = PRODUCTS.find((x) => x.id === Number(id));
+      const p = produtosDisponiveis.find((x) => x.id === id);
       if (!p) return;
       q += count;
-      s += p.price * count;
+      s += p.preco * count;
     });
     return { qty: q, subtotal: s };
-  }, [cart]);
+  }, [cart, produtosDisponiveis]);
 
   const total = subtotal + (qty > 0 ? DELIVERY_FEE : 0);
   const cartBarVisible = qty > 0 && step === "cardapio";
@@ -130,7 +134,7 @@ export default function ClientFlow() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function changeQty(id: number, delta: number) {
+  function changeQty(id: string, delta: number) {
     setCart((prev) => {
       const next = { ...prev };
       const value = (next[id] || 0) + delta;
@@ -164,14 +168,38 @@ export default function ClientFlow() {
     setTimeout(() => dot.remove(), 650);
   }
 
-  function addToCart(evt: React.MouseEvent<HTMLButtonElement>, id: number) {
-    const product = PRODUCTS.find((p) => p.id === id);
+  function addToCart(evt: React.MouseEvent<HTMLButtonElement>, id: string) {
+    const product = produtosDisponiveis.find((p) => p.id === id);
     if (!product) return;
     changeQty(id, 1);
     flyToCart(evt.currentTarget, product.tone);
     setCartShake(true);
     setTimeout(() => setCartShake(false), 450);
     setCardBumpKey((k) => k + 1);
+  }
+
+  // Ao continuar da etapa de CPF: se 11 dígitos foram digitados, busca
+  // se já existe cliente com esse CPF. Achou? pré-preenche nome/telefone
+  // (editável depois). Não achou, ou campo vazio (pulou o CPF)? segue
+  // normal, sem bloquear o fluxo.
+  async function handleContinuarCpf() {
+    const digits = cpf.replace(/\D/g, "");
+    if (digits.length === 11) {
+      try {
+        const cliente = await buscarPorCpf(digits);
+        if (cliente) {
+          setClienteId(cliente.id);
+          setName(cliente.nome);
+          setPhone(cliente.numero_de_telefone || "");
+        } else {
+          setClienteId(undefined);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar cliente por CPF:", err);
+        // Não bloqueia o fluxo por causa disso — segue como CPF novo
+      }
+    }
+    goTo("cardapio");
   }
 
   function selectChip(key: string) {
@@ -187,15 +215,55 @@ export default function ClientFlow() {
     goTo("pagamento-pagina");
   }
 
-  function finishOrder() {
-    setRecap({
-      name: name || "Cliente",
-      items: qty + (qty === 1 ? " item" : " itens"),
-      pay: PAY_LABELS[selectedPay],
-      total: formatMoney(total),
-    });
-    setOrderNum("Pedido #" + (1000 + Math.floor(Math.random() * 9000)));
-    goTo("finalizacao");
+  async function finishOrder() {
+    setEnviando(true);
+    try {
+      const digits = cpf.replace(/\D/g, "");
+      let clienteIdFinal: string | undefined = clienteId;
+
+      // Só grava em `clientes` se a pessoa informou CPF completo.
+      // Isso acontece AGORA (confirmação final), nunca antes — evita
+      // registros de gente que desistiu no meio do fluxo. A função do
+      // banco decide sozinha se cria ou atualiza (ON CONFLICT no cpf).
+      if (digits.length === 11) {
+        const cliente = await salvarCliente({
+          cpf: digits,
+          nome: name || "Cliente",
+          numero_de_telefone: phone || undefined,
+        });
+        clienteIdFinal = cliente.id;
+      }
+
+      const itens = Object.entries(cart).map(([produtoId, quantidade]) => {
+        const produto = produtosDisponiveis.find((p) => p.id === produtoId)!;
+        return {
+          produto_id: produtoId,
+          quantidade,
+          preco_unitario: produto.preco,
+        };
+      });
+
+      const pedidoCriado = await criarPedido({
+        cliente_nome: name || undefined,
+        cliente_id: clienteIdFinal,
+        forma_pagamento: selectedPay,
+        itens,
+      });
+
+      setRecap({
+        name: name || "Cliente",
+        items: qty + (qty === 1 ? " item" : " itens"),
+        pay: PAY_LABELS[selectedPay],
+        total: formatMoney(total),
+      });
+      setOrderNum("Pedido #" + pedidoCriado?.numero_pedido);
+      goTo("finalizacao");
+    } catch (err: any) {
+      console.error("Erro ao enviar pedido:", err);
+      alert(`Não foi possível enviar seu pedido: ${err.message}`);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   function resetFlow() {
@@ -204,6 +272,7 @@ export default function ClientFlow() {
     setCpf("");
     setName("");
     setPhone("");
+    setClienteId(undefined);
     setActiveChip("todos");
     goTo("cpf");
   }
@@ -258,7 +327,7 @@ export default function ClientFlow() {
                 onChange={(e) => setCpf(formatCpf(e.target.value))}
               />
             </div>
-            <button className="pill-btn" onClick={() => goTo("cardapio")}>
+            <button className="pill-btn" onClick={handleContinuarCpf}>
               Continuar →
             </button>
           </div>
@@ -308,54 +377,66 @@ export default function ClientFlow() {
             >
               Todos
             </div>
-            {CATEGORIES.map((cat) => (
+            {categoriasEmUso.map((cat) => (
               <div
-                key={cat.key}
-                className={`chip${activeChip === cat.key ? " active" : ""}`}
-                onClick={() => selectChip(cat.key)}
+                key={cat.id}
+                className={`chip${activeChip === String(cat.id) ? " active" : ""}`}
+                onClick={() => selectChip(String(cat.id))}
               >
-                {cat.label}
+                {cat.nome}
               </div>
             ))}
           </div>
 
-          <div ref={menuWrapRef}>
-            {CATEGORIES.map((cat) => {
-              const items = PRODUCTS.filter((p) => p.cat === cat.key);
-              return (
-                <div
-                  className="menu-section"
-                  key={cat.key}
-                  ref={(el) => {
-                    sectionRefs.current[cat.key] = el;
-                  }}
-                >
-                  <div className="menu-section-head">
-                    <div className="ic">
-                      <CategoryIcon catKey={cat.key} />
-                    </div>
-                    <h2>{cat.label}</h2>
-                    <div className="rule" />
-                  </div>
-                  <div className="prod-grid">
-                    {items.map((p) => (
-                      <div className="prod-card" key={p.id}>
-                        <div className={`prod-photo ${p.tone}`} />
-                        <h3>{p.name}</h3>
-                        <p className="desc">{p.desc}</p>
-                        <div className="prod-foot">
-                          <span className="price">{formatMoney(p.price)}</span>
-                          <button className="add-btn" onClick={(e) => addToCart(e, p.id)}>
-                            +
-                          </button>
-                        </div>
+          {carregandoProdutos ? (
+            <div className="empty-msg">Carregando cardápio...</div>
+          ) : (
+            <div ref={menuWrapRef}>
+              {categoriasEmUso.map((cat) => {
+                const items = produtosDisponiveis.filter((p) => p.categoria_id === cat.id);
+                if (items.length === 0) return null;
+                return (
+                  <div
+                    className="menu-section"
+                    key={cat.id}
+                    ref={(el) => {
+                      sectionRefs.current[String(cat.id)] = el;
+                    }}
+                  >
+                    <div className="menu-section-head">
+                      <div className="ic">
+                        <CupIcon />
                       </div>
-                    ))}
+                      <h2>{cat.nome}</h2>
+                      <div className="rule" />
+                    </div>
+                    <div className="prod-grid">
+                      {items.map((p) => (
+                        <div className="prod-card" key={p.id}>
+                          <div
+                            className={`prod-photo ${p.tone}`}
+                            style={
+                              p.imagem_url
+                                ? { backgroundImage: `url(${p.imagem_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                                : undefined
+                            }
+                          />
+                          <h3>{p.nome}</h3>
+                          <p className="desc">{p.descricao}</p>
+                          <div className="prod-foot">
+                            <span className="price">{formatMoney(p.preco)}</span>
+                            <button className="add-btn" onClick={(e) => addToCart(e, p.id)}>
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -372,14 +453,21 @@ export default function ClientFlow() {
             <div className="empty-msg">Seu carrinho está vazio.</div>
           ) : (
             Object.entries(cart).map(([id, count]) => {
-              const p = PRODUCTS.find((x) => x.id === Number(id));
+              const p = produtosDisponiveis.find((x) => x.id === id);
               if (!p) return null;
               return (
                 <div className="cart-item" key={id}>
-                  <div className="thumb" />
+                  <div
+                    className="thumb"
+                    style={
+                      p.imagem_url
+                        ? { backgroundImage: `url(${p.imagem_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : undefined
+                    }
+                  />
                   <div className="info">
-                    <h3>{p.name}</h3>
-                    <span className="price">{formatMoney(p.price)}</span>
+                    <h3>{p.nome}</h3>
+                    <span className="price">{formatMoney(p.preco)}</span>
                   </div>
                   <div className="stepper">
                     <button onClick={() => changeQty(p.id, -1)}>−</button>
@@ -554,8 +642,8 @@ export default function ClientFlow() {
               <span>Total a pagar</span>
               <span>{formatMoney(total)}</span>
             </div>
-            <button className="pill-btn" style={{ marginTop: 18 }} onClick={finishOrder}>
-              Confirmar pagamento
+            <button className="pill-btn" style={{ marginTop: 18 }} onClick={finishOrder} disabled={enviando}>
+              {enviando ? "Enviando pedido..." : "Confirmar pagamento"}
             </button>
           </div>
         </div>
