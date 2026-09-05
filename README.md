@@ -112,7 +112,7 @@ Cada mesa do café — cliente, produto, pedido — tem seu lugar no banco. As t
 |:---|:---|:---|
 | ☕ **Base** | Next.js (App Router) | SSR, performance e estrutura moderna de rotas |
 | 🥛 **Encorpamento** | TypeScript | Tipagem estática para segurança e produtividade |
-| 🎨 **Latte art** | CSS Modules | Controle total sobre o layout, sem dependências pesadas |
+| 🎨 **Latte art** | CSS puro + Design System | Controle total sobre o layout, com consistência visual entre telas, sem dependências pesadas |
 | 🫘 **Grão selecionado** | Supabase (PostgreSQL) | BaaS completo com Auth, Realtime e Row Level Security |
 | 🧪 **Filtro de qualidade** | Zod *(planejado)* | Validação de schema, barrando dados inválidos antes de chegar ao banco |
 | 📋 **Ficha técnica** | Git + GitHub | Histórico público e documentado do desenvolvimento |
@@ -176,7 +176,13 @@ Do grão cru até o café servido — progresso do projeto por fase, com data de
 - [x] CRUD de produtos e categorias com dados reais via painel admin — `01/09/2026`
 - [x] Upload de foto nos produtos (Supabase Storage) — `01/09/2026`
 - [x] Modal de criação de categoria (substituindo `window.prompt`) — `01/09/2026`
-- [ ] Fluxo de tela do cliente: identificação por CPF → carrinho → confirmação de nome → pedido
+- [ ] Fluxo de tela do cliente:
+  - `/identificacao` — CPF do cliente (identifica recorrente ou inicia cadastro)
+  - `/` (cardápio) — chips de categoria + grid de produtos, carrinho como painel flutuante
+  - `/finalizar` — resumo do carrinho + confirmação de nome + escolha da forma de pagamento
+  - `/pagamento` — tela de pagamento
+  - confirmação — página/rota final de fechamento do pedido
+- [ ] Arrastar/dar zoom na foto do produto, ao criar e (prioridade) ao editar um produto com foto já salva
 - [ ] Painel público de acompanhamento do pedido (`pedidos_publico`)
 - [ ] Tela da cozinha (KDS) com atualizações em tempo real (Supabase Realtime, sem F5)
 
