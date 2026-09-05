@@ -7,7 +7,6 @@
 ![Next.js](https://img.shields.io/badge/Next.js-3B2314?style=for-the-badge&logo=next.js&logoColor=F7E7CE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5C3A21?style=for-the-badge&logo=typescript&logoColor=F7E7CE)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=1C1C1C)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-8A5A34?style=for-the-badge&logo=postgresql&logoColor=F7E7CE)
 ![Zod](https://img.shields.io/badge/Zod-6B4226?style=for-the-badge&logo=zod&logoColor=F7E7CE)
 
 <sub>☕ Sistema completo de gestão e PDV para cafeterias — do grão ao pedido finalizado ☕</sub>
