@@ -30,15 +30,14 @@ export default function LoginPanel({
   const shownError = error ?? localError;
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setLocalError("Preencha e-mail e senha para continuar.");
-      return;
-    }
-    setLocalError(null);
-    login(email.trim(), password.trim());
-    // onSubmit(email.trim(), password.trim());
+  e.preventDefault();
+  if (!email.trim() || !password.trim()) {
+    setLocalError("Preencha e-mail e senha para continuar.");
+    return;
   }
+  setLocalError(null);
+  login(email.trim(), password.trim(), remember);
+}
 
   return (
     <div className="login-panel">
