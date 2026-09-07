@@ -126,7 +126,7 @@ html:has(.admin-panel), body:has(.admin-panel){
 .admin-panel .chip.active{background:var(--gold); border-color:var(--gold); color:#fff;}
 
 /* ---------- cardápio: grid de cards ---------- */
-.admin-panel .menu-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:22px;}
+.admin-panel .menu-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 300px)); gap:24px; margin: 0 auto;}
 .admin-panel .menu-card{background:var(--cream-card); border:1px solid var(--line); border-radius:22px; padding:14px; display:flex; flex-direction:column; gap:10px;}
 .admin-panel .menu-photo{
   position:relative; height:150px; border-radius:16px;

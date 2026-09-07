@@ -204,11 +204,11 @@ export default function ClientFlow() {
 
   function selectChip(key: string) {
     setActiveChip(key);
-    if (key === "todos") {
+    // if (key === "todos") {
       menuWrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    // } else {
+    //   sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // }
   }
 
   function showPayPanel() {
@@ -388,53 +388,50 @@ export default function ClientFlow() {
             ))}
           </div>
 
-          {carregandoProdutos ? (
+            {carregandoProdutos ? (
             <div className="empty-msg">Carregando cardápio...</div>
           ) : (
             <div ref={menuWrapRef}>
-              {categoriasEmUso.map((cat) => {
-                const items = produtosDisponiveis.filter((p) => p.categoria_id === cat.id);
-                if (items.length === 0) return null;
-                return (
-                  <div
-                    className="menu-section"
-                    key={cat.id}
-                    ref={(el) => {
-                      sectionRefs.current[String(cat.id)] = el;
-                    }}
-                  >
-                    <div className="menu-section-head">
-                      <div className="ic">
-                        <CupIcon />
-                      </div>
-                      <h2>{cat.nome}</h2>
-                      <div className="rule" />
-                    </div>
-                    <div className="prod-grid">
-                      {items.map((p) => (
-                        <div className="prod-card" key={p.id}>
-                          <div
-                            className={`prod-photo ${p.tone}`}
-                            style={
-                              p.imagem_url
-                                ? { backgroundImage: `url(${p.imagem_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                                : undefined
-                            }
-                          />
-                          <h3>{p.nome}</h3>
-                          <p className="desc">{p.descricao}</p>
-                          <div className="prod-foot">
-                            <span className="price">{formatMoney(p.preco)}</span>
-                            <button className="add-btn" onClick={(e) => addToCart(e, p.id)}>
-                              +
-                            </button>
-                          </div>
+              {categoriasEmUso
+                .filter((cat) => activeChip === "todos" || String(cat.id) === activeChip)
+                .map((cat) => {
+                  const items = produtosDisponiveis.filter((p) => p.categoria_id === cat.id);
+                  if (items.length === 0) return null;
+                  
+                  return (
+                    <div className="menu-section" key={cat.id}>
+                      <div className="menu-section-head">
+                        <div className="ic">
+                          <CupIcon />
                         </div>
-                      ))}
+                        <h2>{cat.nome}</h2>
+                        <div className="rule" />
+                      </div>
+                      <div className="prod-grid">
+                        {items.map((p) => (
+                          <div className="prod-card" key={p.id}>
+                            <div
+                              className={`prod-photo ${p.tone}`}
+                              style={
+                                p.imagem_url
+                                  ? { backgroundImage: `url(${p.imagem_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                                  : undefined
+                              }
+                            />
+                            <h3>{p.nome}</h3>
+                            <p className="desc">{p.descricao}</p>
+                            <div className="prod-foot">
+                              <span className="price">{formatMoney(p.preco)}</span>
+                              <button className="add-btn" onClick={(e) => addToCart(e, p.id)}>
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           )}
         </div>

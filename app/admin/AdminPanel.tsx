@@ -125,6 +125,10 @@ export default function AdminPanel() {
       alert("Nome e preço são obrigatórios!");
       return;
     }
+    if (!formCategoriaId) {
+      alert("Escolha uma categoria para o item!");
+      return;
+    }
 
     const precoNumerico = parseFloat(formPreco.replace(",", "."));
 
@@ -556,6 +560,21 @@ export default function AdminPanel() {
               onChange={(e) => setFormPreco(e.target.value)}
               placeholder="0,00"
             />
+
+            <div className="modal-label">Categoria</div>
+            <select
+              className="pill-btn outline"
+              style={{ width: '100%', textAlign: 'left', marginBottom: 16, cursor: 'pointer' }}
+              value={formCategoriaId ?? ""}
+              onChange={(e) => setFormCategoriaId(e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="" disabled>Selecione uma categoria</option>
+              {categorias.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nome}
+                </option>
+              ))}
+            </select>
 
             <div className="modal-label">Estoque</div>
             <div className="stepper" style={{ marginBottom: 16 }}>

@@ -82,7 +82,7 @@
 .client-flow .chip:hover{transform:translateY(-1px);}
 .client-flow .chip.active{background:var(--gold); border-color:var(--gold); color:#fff;}
 
-.client-flow .prod-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:20px; margin-bottom:110px;}
+.client-flow .prod-grid{display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 280px)); gap: 20px; margin-bottom: 110px; justify-content: start;}
 .client-flow .menu-section{margin-bottom:38px;}
 .client-flow .menu-section .prod-grid{margin-bottom:0;}
 .client-flow .menu-section:last-child{margin-bottom:110px;}
