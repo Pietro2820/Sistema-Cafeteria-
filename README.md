@@ -1,10 +1,12 @@
 <div align="center">
 <img src="./assets/banner.svg" alt="Sistema Cafeteria" width="100%"/>
 <br/>
+  
 <img src="https://img.shields.io/badge/Next.js-3B2314?style=for-the-badge&logo=next.js&logoColor=F7E7CE" alt="Next.js"/>
 <img src="https://img.shields.io/badge/TypeScript-5C3A21?style=for-the-badge&logo=typescript&logoColor=F7E7CE" alt="TypeScript"/>
 <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=1C1C1C" alt="Supabase"/>
 <img src="https://img.shields.io/badge/Zod-6B4226?style=for-the-badge&logo=zod&logoColor=F7E7CE" alt="Zod"/>
+ 
 <sub>☕ Sistema completo de gestão e PDV para cafeterias — do grão ao pedido finalizado ☕</sub>
 <br/>
 <a href="#-sobre-o-projeto">Sobre</a> • 
