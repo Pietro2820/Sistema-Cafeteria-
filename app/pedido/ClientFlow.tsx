@@ -126,7 +126,7 @@ export default function ClientFlow() {
     return { qty: q, subtotal: s };
   }, [cart, produtosDisponiveis]);
 
-  const total = subtotal + (qty > 0 ? 0 : 0); // DELIVERY_FEE removed for now, as per your request
+  const total = subtotal + (qty > 0 ? 0 : 0);
   const cartBarVisible = qty > 0 && step === "cardapio";
 
   function goTo(next: StepId) {
