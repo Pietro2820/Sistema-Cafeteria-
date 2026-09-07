@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import "./LoginPainel.css";
+import { login } from "./actions";
 
 interface LoginPanelProps {
-  /** Chamado ao enviar o formulário, já com email e senha prontos pra sua função de auth. */
-  onSubmit: (email: string, password: string) => void | Promise<void>;
   /** Controla o estado de carregamento (passe true enquanto sua chamada de auth estiver em andamento). */
   loading?: boolean;
   /** Mensagem de erro vinda da sua lógica de auth (ex: "E-mail ou senha incorretos."). */
@@ -17,7 +16,6 @@ interface LoginPanelProps {
 }
 
 export default function LoginPanel({
-  onSubmit,
   loading = false,
   error,
   onForgotPassword,
@@ -38,7 +36,8 @@ export default function LoginPanel({
       return;
     }
     setLocalError(null);
-    onSubmit(email.trim(), password.trim());
+    login(email.trim(), password.trim());
+    // onSubmit(email.trim(), password.trim());
   }
 
   return (
