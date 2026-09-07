@@ -126,7 +126,7 @@ export default function ClientFlow() {
     return { qty: q, subtotal: s };
   }, [cart, produtosDisponiveis]);
 
-  const total = subtotal + (qty > 0 ? DELIVERY_FEE : 0);
+  const total = subtotal + (qty > 0 ? 0 : 0); // DELIVERY_FEE removed for now, as per your request
   const cartBarVisible = qty > 0 && step === "cardapio";
 
   function goTo(next: StepId) {
@@ -484,13 +484,9 @@ export default function ClientFlow() {
               <span>Subtotal</span>
               <span>{formatMoney(subtotal)}</span>
             </div>
-            <div className="summary-row">
-              <span>Taxa de entrega</span>
-              <span>{formatMoney(DELIVERY_FEE)}</span>
-            </div>
             <div className="summary-row total">
               <span>Total</span>
-              <span>{formatMoney(qty > 0 ? subtotal + DELIVERY_FEE : 0)}</span>
+              <span>{formatMoney(qty > 0 ? subtotal : 0)}</span>
             </div>
           </div>
           <div className="btn-row">
