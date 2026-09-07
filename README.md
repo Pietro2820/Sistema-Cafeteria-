@@ -1,25 +1,24 @@
 <div align="center">
-
 <img src="./assets/banner.svg" alt="Sistema Cafeteria" width="100%"/>
-
 <br/>
-
-![Next.js](https://img.shields.io/badge/Next.js-3B2314?style=for-the-badge&logo=next.js&logoColor=F7E7CE)
-![TypeScript](https://img.shields.io/badge/TypeScript-5C3A21?style=for-the-badge&logo=typescript&logoColor=F7E7CE)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=1C1C1C)
-![Zod](https://img.shields.io/badge/Zod-6B4226?style=for-the-badge&logo=zod&logoColor=F7E7CE)
-
+<img src="https://img.shields.io/badge/Next.js-3B2314?style=for-the-badge&logo=next.js&logoColor=F7E7CE" alt="Next.js"/>
+<img src="https://img.shields.io/badge/TypeScript-5C3A21?style=for-the-badge&logo=typescript&logoColor=F7E7CE" alt="TypeScript"/>
+<img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=1C1C1C" alt="Supabase"/>
+<img src="https://img.shields.io/badge/Zod-6B4226?style=for-the-badge&logo=zod&logoColor=F7E7CE" alt="Zod"/>
 <sub>☕ Sistema completo de gestão e PDV para cafeterias — do grão ao pedido finalizado ☕</sub>
-
 <br/>
-
-[Sobre](#-sobre-o-projeto) • [Arquitetura](#️-arquitetura-a-receita-por-trás-do-café) • [Banco de Dados](#️-do-grão-à-xícara-modelagem-do-banco) • [Cardápio Técnico](#️-cardápio-técnico) • [Etapas de Preparo](#️-etapas-de-preparo-roadmap) • [Segurança](#-segurança-em-camadas-o-cuidado-com-cada-grão) • [Como Rodar](#-como-servir-este-café-instalação) • [Baristas](#-baristas-autores)
-
+<a href="#-sobre-o-projeto">Sobre</a> • 
+<a href="#-arquitetura-a-receita-por-trás-do-café">Arquitetura</a> • 
+<a href="#-do-grão-à-xícara-modelagem-do-banco">Banco de Dados</a> • 
+<a href="#-cardápio-técnico">Cardápio Técnico</a> • 
+<a href="#-etapas-de-preparo-roadmap">Etapas de Preparo</a> • 
+<a href="#-segurança-em-camadas-o-cuidado-com-cada-grão">Segurança</a> • 
+<a href="#-como-servir-este-café-instalação">Como Rodar</a> • 
+<a href="#-baristas-autores">Baristas</a>
 </div>
-
 <br/>
 
-> ☕ **Nota do barista:** este projeto é preparado com carinho e documentado em tempo real — cada commit é um grão a mais na mistura.
+> ☕ **Nota do barista**: este projeto é preparado com carinho e documentado em tempo real — cada commit é um grão a mais na mistura.
 
 ---
 
@@ -35,13 +34,13 @@ O cardápio é servido para **3 públicos distintos**, cada um com sua própria 
 
 O desenvolvimento segue a filosofia de **Learning in Public** ☀️ — cada etapa é documentada aqui para que qualquer pessoa acompanhe a evolução em tempo real, do mesmo jeito que se acompanha um espresso sendo tirado.
 
-> 💡 Este é o segundo projeto fullstack de Pietro, após o [**ParkSim**](https://github.com/Pietro2820/ParkSim) (Java + MySQL) — agora explorando uma stack moderna com Next.js e Supabase.
+> 💡 Este é o segundo projeto fullstack de Pietro, após o [ParkSim](https://github.com/Pietro2820/ParkSim) (Java + MySQL) — agora explorando uma stack moderna com Next.js e Supabase.
 
 ---
 
 ## ☕️ Arquitetura (a receita por trás do café)
 
-Assim como um bom café depende de etapas bem definidas — moer, extrair, servir — o sistema segue uma arquitetura em camadas, para que backend e frontend evoluam em paralelo sem pisar um no pé do outro:
+Assim como um bom café depende de etapas bem definidas — moer, extrair, servir — o sistema segue uma **arquitetura em camadas**, para que backend e frontend evoluam em paralelo sem pisar um no pé do outro:
 
 <div align="center">
 
@@ -49,24 +48,23 @@ Assim como um bom café depende de etapas bem definidas — moer, extrair, servi
 |:---:|:---|:---|
 | 🫘 `services/` | **Moagem** — prepara a matéria-prima | Única camada que fala com o Supabase/Storage: CRUD, queries, regras de negócio |
 | ⚙️ `hooks/` | **Extração** — transforma em algo consumível | Estado reativo: loading, erros e ponte entre backend e frontend |
-| ☕ `app/` + `components/` | **Serviço** — o que chega até a mesa | Interface (UI), consumindo **apenas** os hooks — nunca o Supabase diretamente |
+| ☕ `app/` + `components/` | **Serviço** — o que chega até a mesa | Interface (UI), consumindo *apenas* os hooks — nunca o Supabase diretamente |
 
 </div>
 
-```
 Supabase (PostgreSQL)
-        ↓
-    services/        → 🫘 moagem dos dados
-        ↓
-     hooks/           → ⚙️ extração (estado, loading, erros)
-        ↓
-  app/ + components/  → ☕ o café servido (UI)
-```
+↓
+services/ → 🫘 moagem dos dados
+↓
+hooks/ → ⚙️ extração (estado, loading, erros)
+↓
+app/ + components/ → ☕ o café servido (UI)
+
 
 Dentro de `services/`, dois clients diferentes do Supabase são usados conforme o contexto:
 
-- `lib/supabase/client.ts` — client de **browser**, usado por `services/`, hooks e componentes `'use client'`
-- `lib/supabase/server.ts` — client de **server**, usado por `middleware.ts` e Server Components
+- `lib/supabase/client.ts` — client de browser, usado por `services/`, hooks e componentes `'use client'`
+- `lib/supabase/server.ts` — client de server, usado por `middleware.ts` e Server Components
 
 Essa separação mantém a lógica de negócio isolada da interface — facilita testes, manutenção e a divisão de tarefas entre os desenvolvedores. Alguns princípios seguidos à risca:
 
@@ -87,8 +85,8 @@ Cada mesa do café — cliente, produto, pedido — tem seu lugar no banco. As t
 |:---|:---|
 | `categorias` | Categorias do cardápio (`id`, `nome`) |
 | `produtos` | Itens do cardápio — `preco`, `estoque`, `avaliacao`, `imagem_url`, `disponivel` |
-| `clientes` | Identidade do cliente por **CPF** (nome, `auth_user_id` opcional para integração futura com app de delivery) |
-| `pedidos` | `numero_pedido` (gerado por trigger, reinicia diariamente), `cliente_id`, `cliente_nome`, `status`, `valor_total` |
+| `clientes` | Identidade do cliente por `CPF` (nome, `auth_user_id` opcional para integração futura com app de delivery) |
+| `pedidos` | `numero_pedido` (gerado por trigger, reinicia diariamente), `cliente_id`, `cliente_nome`, `telefone`, `forma_pagamento`, `status`, `valor_total` |
 | `itens_pedido` | Itens de cada pedido (FK cascade com `pedidos`) |
 | `contadores_pedido` | Tabela auxiliar da trigger de numeração diária |
 
@@ -96,10 +94,10 @@ Cada mesa do café — cliente, produto, pedido — tem seu lugar no banco. As t
 
 **Decisões de design que valem a pena registrar:**
 
-- ☕ **`pedidos.cliente_id` aponta para `clientes`, não para `auth.users`.** Isso permite identificar o cliente pelo CPF no totem, **sem exigir login**. Quando (no futuro) um app de delivery for lançado, o mesmo CPF vincula o histórico existente a uma conta de login (`clientes.auth_user_id`), sem necessidade de migração de dados.
-- 🔢 **Numeração de pedido via trigger (`numero_pedido`)**, não calculada no código da aplicação. Usa `INSERT ... ON CONFLICT ... DO UPDATE ... RETURNING` para ser atômica — evita números duplicados quando dois pedidos são confirmados no mesmo instante (race condition). Reinicia todo dia.
+- ☕ `pedidos.cliente_id` aponta para `clientes`, não para `auth.users`. Isso permite identificar o cliente pelo CPF no totem, sem exigir login. Quando (no futuro) um app de delivery for lançado, o mesmo CPF vincula o histórico existente a uma conta de login (`clientes.auth_user_id`), sem necessidade de migração de dados.
+- 🔢 **Numeração de pedido via trigger** (`numero_pedido`), não calculada no código da aplicação. Usa `INSERT ... ON CONFLICT ... DO UPDATE ... RETURNING` para ser atômica — evita números duplicados quando dois pedidos são confirmados no mesmo instante (race condition). Reinicia todo dia.
 - 👻 **Cliente só é gravado em `clientes` na confirmação final do pedido**, nunca ao simplesmente digitar o CPF — evita registros "fantasma" de gente que desistiu no meio do fluxo.
-- 📺 **View `pedidos_publico`** — exposta para leitura anônima (painel de acompanhamento tipo "Senha #47 — Pronto", sem exigir login do cliente). Mostra apenas `numero_pedido`, `status` e `criado_em`, filtrada para pedidos do dia atual (performance). Nome, valor e observação do pedido **nunca** são expostos publicamente — ficam só na tabela real `pedidos`, protegida por RLS.
+- 📺 **View `pedidos_publico`** — exposta para leitura anônima (painel de acompanhamento tipo "Senha #47 — Pronto"), sem exigir login do cliente. Mostra apenas `numero_pedido`, `status` e `criado_em`, filtrada para pedidos do dia atual (performance). Nome, valor e observação do pedido *nunca* são expostos publicamente — ficam só na tabela real `pedidos`, protegida por RLS.
 
 ---
 
@@ -113,7 +111,7 @@ Cada mesa do café — cliente, produto, pedido — tem seu lugar no banco. As t
 | 🥛 **Encorpamento** | TypeScript | Tipagem estática para segurança e produtividade |
 | 🎨 **Latte art** | CSS puro + Design System | Controle total sobre o layout, com consistência visual entre telas, sem dependências pesadas |
 | 🫘 **Grão selecionado** | Supabase (PostgreSQL) | BaaS completo com Auth, Realtime e Row Level Security |
-| 🧪 **Filtro de qualidade** | Zod *(planejado)* | Validação de schema, barrando dados inválidos antes de chegar ao banco |
+| 🧪 **Filtro de qualidade** | Zod (planejado) | Validação de schema, barrando dados inválidos antes de chegar ao banco |
 | 📋 **Ficha técnica** | Git + GitHub | Histórico público e documentado do desenvolvimento |
 
 </div>
@@ -142,6 +140,7 @@ Do grão cru até o café servido — progresso do projeto por fase, com data de
 - [x] Adicionar colunas de timestamp (`criado_em`, `atualizado_em`) com triggers automáticos — `31/08/2026`
 - [x] Numeração de pedido diária via trigger atômica (`numero_pedido`) — `31/08/2026`
 - [x] View pública `pedidos_publico` para acompanhamento sem login — `01/09/2026`
+- [x] Campos de `telefone` e `forma_pagamento` na tabela `pedidos` — `04/09/2026`
 
 </details>
 
@@ -156,13 +155,15 @@ Do grão cru até o café servido — progresso do projeto por fase, com data de
 
 </details>
 
-<details open>
+<details>
 <summary><strong>🔐 Fase 3 — Torrando o Grão (Autenticação & Segurança)</strong> <kbd>concluída</kbd></summary>
 
 - [x] Sistema de login (Supabase Auth) com papéis (`admin` / `operario`) atribuídos manualmente — `01/09/2026`
+- [x] Migração para `@supabase/ssr` (client seguro para SSR/middleware) — `01/09/2026`
 - [x] Middleware protegendo `/admin` e `/cozinha`, validando sessão via `getUser()` e checando papel — `01/09/2026`
 - [x] Row Level Security (RLS) habilitado e testado em todas as tabelas — `01/09/2026`
 - [x] Storage do bucket `produtos` público para leitura, escrita restrita a `admin` — `01/09/2026`
+- [x] Funcionalidade "Manter conectado" (checkbox de sessão persistente) — `07/09/2026`
 
 </details>
 
@@ -175,12 +176,12 @@ Do grão cru até o café servido — progresso do projeto por fase, com data de
 - [x] CRUD de produtos e categorias com dados reais via painel admin — `01/09/2026`
 - [x] Upload de foto nos produtos (Supabase Storage) — `01/09/2026`
 - [x] Modal de criação de categoria (substituindo `window.prompt`) — `01/09/2026`
-- [ ] Fluxo de tela do cliente:
-  - `/identificacao` — CPF do cliente (identifica recorrente ou inicia cadastro)
-  - `/` (cardápio) — chips de categoria + grid de produtos, carrinho como painel flutuante
-  - `/finalizar` — resumo do carrinho + confirmação de nome + escolha da forma de pagamento
-  - `/pagamento` — tela de pagamento
-  - confirmação — página/rota final de fechamento do pedido
+- [x] **Fluxo de tela do cliente (em desenvolvimento)** — `07/09/2026`:
+  - [x] `/identificacao` — CPF do cliente (identifica recorrente ou inicia cadastro)
+  - [x] `/` (cardápio) — chips de categoria + grid de produtos, carrinho como painel flutuante
+  - [x] `/finalizar` — resumo do carrinho + confirmação de nome + escolha da forma de pagamento
+  - [x] `/pagamento` — tela de pagamento
+  - [ ] `/confirmacao` — página/rota final de fechamento do pedido
 - [ ] Arrastar/dar zoom na foto do produto, ao criar e (prioridade) ao editar um produto com foto já salva
 - [ ] Painel público de acompanhamento do pedido (`pedidos_publico`)
 - [ ] Tela da cozinha (KDS) com atualizações em tempo real (Supabase Realtime, sem F5)
@@ -204,31 +205,34 @@ Do grão cru até o café servido — progresso do projeto por fase, com data de
 
 Segurança não é um tempero opcional, é a base da receita. O projeto segue o princípio de **defense in depth** (defesa em profundidade), em três níveis:
 
-**Nível 1 — Obrigatório (produção mínima)** <kbd>implementado ✅</kbd>
-- Row Level Security (RLS) com políticas granulares em cada tabela:
+### Nível 1 — Obrigatório (produção mínima) <kbd>implementado ✅</kbd>
 
-  <div align="center">
+- **Row Level Security (RLS)** com políticas granulares em cada tabela:
 
-  | Tabela | Leitura | Escrita |
-  |:---|:---|:---|
-  | `categorias`, `produtos` | Pública | Só `admin` |
-  | `pedidos` (tabela real) | Só `admin`/`operario` | INSERT público (autoatendimento); UPDATE/DELETE só `admin`/`operario` — cliente nunca altera o próprio pedido após enviar |
-  | `itens_pedido` | Só `admin`/`operario` | Igual a `pedidos` |
-  | `clientes` | Próprio (via `auth_user_id`) ou `admin` | INSERT público; UPDATE só próprio/`admin` |
-  | `pedidos_publico` (view) | Pública | — |
+<div align="center">
 
-  </div>
+| Tabela | Leitura | Escrita |
+|:---|:---|:---|
+| `categorias`, `produtos` | Pública | Só `admin` |
+| `pedidos` (tabela real) | Só `admin`/`operario` | INSERT público (autoatendimento); UPDATE/DELETE só `admin`/`operario` — cliente nunca altera o próprio pedido após enviar |
+| `itens_pedido` | Só `admin`/`operario` | Igual a `pedidos` |
+| `clientes` | Próprio (via `auth_user_id`) ou `admin` | INSERT público; UPDATE só próprio/`admin` |
+| `pedidos_publico` (view) | Pública | — |
 
-- Autenticação via Supabase Auth (email + senha, confirmação de email obrigatória), com papéis definidos em `user_metadata.role` — ninguém se autopromove
-- Middleware do Next.js protegendo `/admin` e `/cozinha`, validando sessão via `getUser()` (nunca `getSession()`, que não valida o JWT)
-- Chaves seguras: `anon_key` é pública por design; `service_role_key` **nunca** entra no frontend — ela ignora o RLS, e fica restrita a Edge Functions/ambiente server quando implementado
+</div>
 
-**Nível 2 — Profissional (confiabilidade)** <kbd>em andamento</kbd>
-- Validação com Zod em todos os services, barrando dados inválidos antes do banco *(planejado)*
+- **Autenticação via Supabase Auth** (email + senha, confirmação de email obrigatória), com papéis definidos em `user_metadata.role` — ninguém se autopromove
+- **Middleware do Next.js** protegendo `/admin` e `/cozinha`, validando sessão via `getUser()` (nunca `getSession()`, que não valida o JWT)
+- **Chaves seguras**: `anon_key` é pública por design; `service_role_key` **nunca** entra no frontend — ela ignora o RLS, e fica restrita a Edge Functions/ambiente server quando implementado
+
+### Nível 2 — Profissional (confiabilidade) <kbd>em andamento</kbd>
+
+- Validação com Zod em todos os services, barrando dados inválidos antes do banco (planejado)
 - Middleware já protege as rotas sensíveis (ver Nível 1)
 - Sanitização — nunca renderizar HTML cru vindo do usuário
 
-**Nível 3 — Enterprise (produção robusta)** <kbd>planejada</kbd>
+### Nível 3 — Enterprise (produção robusta) <kbd>planejada</kbd>
+
 - Edge Functions para lógica sensível (cálculo de totais, baixa de estoque) rodando com `service_role`
 - Headers de segurança (CSP, X-Frame-Options, HSTS) no `next.config.ts`
 - Auditoria via trigger, registrando quem alterou o quê em uma tabela `audit_logs`
@@ -238,7 +242,7 @@ Segurança não é um tempero opcional, é a base da receita. O projeto segue o 
 
 ## 🚀 Como Servir Este Café (Instalação)
 
-**Pré-requisitos:** Node.js 18+ e uma conta [Supabase](https://supabase.com/).
+Pré-requisitos: Node.js 18+ e uma conta [Supabase](https://supabase.com/).
 
 ```bash
 # 1. Clone o repositório
