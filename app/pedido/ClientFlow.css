@@ -159,3 +159,22 @@
   .client-flow .cart-bar{padding:14px 20px;}
   .client-flow .card{padding:26px 20px;}
 }
+
+ /*Tela de aviso de inatividade*/
+.client-flow .inactivity-overlay{
+  position:fixed; inset:0; background:rgba(36,31,24,0.55); backdrop-filter:blur(2px);
+  display:flex; align-items:center; justify-content:center; z-index:200; padding:20px;
+}
+.client-flow .inactivity-card{
+  background:var(--cream-card); border-radius:24px; padding:36px 30px; max-width:360px;
+  width:100%; text-align:center; box-shadow:0 30px 60px rgba(0,0,0,0.3); animation:popIn .3s ease;
+}
+.client-flow .inactivity-timer{
+  width:64px; height:64px; border-radius:50%; background:var(--forest); color:#fff;
+  font-family:'Fraunces',serif; font-size:26px; font-weight:600;
+  display:flex; align-items:center; justify-content:center; margin:0 auto 18px;
+}
+.client-flow .inactivity-card h2{font-size:20px; margin-bottom:8px;}
+.client-flow .inactivity-card p{font-size:13.5px; color:var(--ink-soft); line-height:1.5; margin:0 0 22px;}
+.client-flow .inactivity-actions{display:flex; gap:12px;}
+.client-flow .inactivity-actions .pill-btn{width:auto; flex:1;}

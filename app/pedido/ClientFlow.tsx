@@ -19,10 +19,6 @@ type StepId =
 type PayType = "pix" | "cartao" | "dinheiro";
 type Tone = "sage" | "tan" | "blush";
 
-// Os produtos/categorias agora vêm do banco (useProdutos/useCategorias).
-// `Tone` continua existindo só pra dar variedade visual aos cards quando
-// o produto não tem foto — é atribuído por posição (round-robin), não
-// é um dado real do banco.
 const TONES: Tone[] = ["sage", "tan", "blush"];
 
 const STAGES: Record<StepId, number> = {
@@ -59,6 +55,10 @@ const PAY_LABELS: Record<PayType, string> = {
 
 const DELIVERY_FEE = 5;
 
+// --- ADICIONADO: constantes do timer de inatividade ---
+const IDLE_TIMEOUT_MS = 30_000; // 30s sem interação até mostrar o aviso
+const WARNING_SECONDS = 10;     // 10s pra pessoa responder no aviso
+
 function formatMoney(v: number) {
   return "R$ " + v.toFixed(2).replace(".", ",");
 }
@@ -72,16 +72,12 @@ function formatCpf(raw: string) {
 }
 
 export default function ClientFlow() {
-  // Dados reais vindos do banco, via hooks (nunca falamos com o
-  // Supabase direto aqui — arquitetura em camadas)
   const { produtos, carregando: carregandoProdutos } = useProdutos();
   const { categorias } = useCategorias();
   const { criar: criarPedido } = usePedidos();
   const { buscarPorCpf, salvar: salvarCliente } = useClientes();
 
   const [step, setStep] = useState<StepId>("cpf");
-  // Carrinho agora é chaveado por STRING (uuid do produto), não number,
-  // porque produtos reais do Supabase têm id do tipo uuid.
   const [cart, setCart] = useState<Record<string, number>>({});
   const [selectedPay, setSelectedPay] = useState<PayType>("pix");
   const [activeChip, setActiveChip] = useState<string>("todos");
@@ -95,20 +91,24 @@ export default function ClientFlow() {
   const [orderNum, setOrderNum] = useState("");
   const [recap, setRecap] = useState({ name: "—", items: "—", pay: "—", total: "—" });
 
+  // --- ADICIONADO: estados do timer de inatividade ---
+  const [showInactivityModal, setShowInactivityModal] = useState(false);
+  const [countdown, setCountdown] = useState(WARNING_SECONDS);
+
   const cartIconRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuWrapRef = useRef<HTMLDivElement>(null);
 
-  // Produtos disponíveis pro cardápio: só os marcados como `disponivel`.
-  // Cada produto recebe um `tone` de reserva (pra quando não tem foto),
-  // atribuído por posição na lista.
+  // --- ADICIONADO: refs do timer de inatividade ---
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const produtosDisponiveis = useMemo(() => {
     return produtos
       .filter((p) => p.disponivel)
       .map((p, i) => ({ ...p, tone: TONES[i % TONES.length] }));
   }, [produtos]);
 
-  // Categorias em uso: só as que têm pelo menos 1 produto disponível
   const categoriasEmUso = useMemo(() => {
     const idsComProduto = new Set(produtosDisponiveis.map((p) => p.categoria_id));
     return categorias.filter((c) => idsComProduto.has(c.id));
@@ -126,7 +126,11 @@ export default function ClientFlow() {
     return { qty: q, subtotal: s };
   }, [cart, produtosDisponiveis]);
 
+<<<<<<< HEAD
+  const total = subtotal + (qty > 0 ? 0 : 0);
+=======
   const total = subtotal + (qty > 0 ? 0 : 0); // DELIVERY_FEE removed for now, as per your request
+>>>>>>> b1cb96985118ecc2ddf07f468bfcdab2fbed91f6
   const cartBarVisible = qty > 0 && step === "cardapio";
 
   function goTo(next: StepId) {
@@ -178,10 +182,6 @@ export default function ClientFlow() {
     setCardBumpKey((k) => k + 1);
   }
 
-  // Ao continuar da etapa de CPF: se 11 dígitos foram digitados, busca
-  // se já existe cliente com esse CPF. Achou? pré-preenche nome/telefone
-  // (editável depois). Não achou, ou campo vazio (pulou o CPF)? segue
-  // normal, sem bloquear o fluxo.
   async function handleContinuarCpf() {
     const digits = cpf.replace(/\D/g, "");
     if (digits.length === 11) {
@@ -196,7 +196,6 @@ export default function ClientFlow() {
         }
       } catch (err) {
         console.error("Erro ao buscar cliente por CPF:", err);
-        // Não bloqueia o fluxo por causa disso — segue como CPF novo
       }
     }
     goTo("cardapio");
@@ -221,10 +220,6 @@ export default function ClientFlow() {
       const digits = cpf.replace(/\D/g, "");
       let clienteIdFinal: string | undefined = clienteId;
 
-      // Só grava em `clientes` se a pessoa informou CPF completo.
-      // Isso acontece AGORA (confirmação final), nunca antes — evita
-      // registros de gente que desistiu no meio do fluxo. A função do
-      // banco decide sozinha se cria ou atualiza (ON CONFLICT no cpf).
       if (digits.length === 11) {
         const cliente = await salvarCliente({
           cpf: digits,
@@ -276,6 +271,69 @@ export default function ClientFlow() {
     setActiveChip("todos");
     goTo("cpf");
   }
+
+  // --- ADICIONADO: funções do timer de inatividade ---
+  function resetIdleTimer() {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      triggerInactivityWarning();
+    }, IDLE_TIMEOUT_MS);
+  }
+
+  function triggerInactivityWarning() {
+    setShowInactivityModal(true);
+    setCountdown(WARNING_SECONDS);
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownIntervalRef.current!);
+          handleCancelOrder();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  function handleContinueOrder() {
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setShowInactivityModal(false);
+    resetIdleTimer();
+  }
+
+  function handleCancelOrder() {
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    setShowInactivityModal(false);
+    resetFlow();
+  }
+
+  useEffect(() => {
+    const emAndamento = step !== "cpf" && step !== "finalizacao";
+
+    if (!emAndamento) {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+      setShowInactivityModal(false);
+      return;
+    }
+
+    if (showInactivityModal) return;
+
+    resetIdleTimer();
+
+    function handleActivity() {
+      resetIdleTimer();
+    }
+
+    const eventos = ["mousedown", "touchstart", "keydown"];
+    eventos.forEach((ev) => window.addEventListener(ev, handleActivity));
+
+    return () => {
+      eventos.forEach((ev) => window.removeEventListener(ev, handleActivity));
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [step, showInactivityModal]);
+  // --- FIM DO ADICIONADO ---
 
   return (
     <div className="client-flow">
@@ -694,6 +752,25 @@ export default function ClientFlow() {
         </div>
         <button onClick={() => goTo("carrinho")}>Ver carrinho →</button>
       </div>
+
+      {/* --- ADICIONADO: modal de inatividade --- */}
+      {showInactivityModal && (
+        <div className="inactivity-overlay">
+          <div className="inactivity-card">
+            <div className="inactivity-timer">{countdown}</div>
+            <h2>Ainda está aí?</h2>
+            <p>Por inatividade, seu pedido será cancelado em instantes.</p>
+            <div className="inactivity-actions">
+              <button className="pill-btn outline" onClick={handleCancelOrder}>
+                Não, cancelar
+              </button>
+              <button className="pill-btn" onClick={handleContinueOrder}>
+                Sim, continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
